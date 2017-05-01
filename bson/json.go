@@ -30,6 +30,42 @@ func MarshalJSON(value interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+func (d D) MarshalJSON() ([]byte, error) {
+	var b bytes.Buffer
+
+	if d == nil {
+		b.WriteString("null")
+		return nil, nil
+	}
+
+	b.WriteByte('{')
+
+	for i, v := range d {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+
+		// marshal key
+		key, err := Marshal(v.Name)
+		if err != nil {
+			return nil, err
+		}
+		b.Write(key)
+		b.WriteByte(':')
+
+		// marshal value
+		val, err := Marshal(v.Value)
+		if err != nil {
+			return nil, err
+		}
+		b.Write(val)
+	}
+
+	b.WriteByte('}')
+
+	return b.Bytes(), nil
+}
+
 // jdec is used internally by the JSON decoding functions
 // so they may unmarshal functions without getting into endless
 // recursion due to keyed objects.
